@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from itertools import zip_longest
 
 
 @dataclass
@@ -9,36 +10,42 @@ class Inventory:
         return sum(self.content)
 
 
-def read_inventory(filename: str):
+def split_array(value: str, array: list[str]):
+    indices = [i for i, x in enumerate(array) if x == value]
+    return list(
+        map(
+            lambda lr: array[lr[0] : lr[1]],
+            zip_longest([0] + list(map(lambda x: x + 1, indices)), indices),
+        )
+    )
+
+
+def read_inventory_calories(lines: list[str]) -> list[int]:
+    return list(
+        map(
+            lambda x: x.total(),
+            map(lambda c: Inventory(list(map(int, c))), split_array("", lines)),
+        )
+    )
+
+
+def part_one(data: list[int]):
+    return max(data)
+
+
+def part_two(data: list[int]):
+    return sum(sorted(data)[-3:])
+
+
+def read_data(filename: str) -> list[str]:
     with open(filename, "r") as f:
-        lines = list(map(lambda x: x.replace("\n", ""), f.readlines()))
-        buf = []
-        inv = []
-        for line in lines:
-            if len(line) == 0:
-                inv.append(Inventory(content=list(map(int, buf.copy()))))
-                buf.clear()
-            else:
-                buf.append(line)
-        else:
-            inv.append(Inventory(content=list(map(int, buf.copy()))))
-        return list(map(lambda x: x.total(), inv))
-
-
-def part_one(filename: str):
-    res = read_inventory(filename)
-    return max(res)
-
-
-def part_two(filename: str):
-    inv = read_inventory(filename)
-    content = sorted(inv)[-3:]
-    return sum(content)
+        return list(map(lambda x: x.strip(), f.readlines()))
 
 
 def main():
-    print(f"Part one: {part_one('input.txt')}")
-    print(f"Part one: {part_two('input.txt')}")
+    data = read_inventory_calories(read_data("input_test.txt"))
+    print(f"Part one: {part_one(data)}")
+    print(f"Part two: {part_two(data)}")
 
 
 if __name__ == "__main__":
