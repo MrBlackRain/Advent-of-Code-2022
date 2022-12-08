@@ -92,34 +92,54 @@ def deduce_shape(opponents_hand: Shape, expected_result: GameResult) -> Shape:
     return Shape.lose_to(opponents_hand)
 
 
-def part_one(filename: str):
-    with open(filename, "r") as f:
-        lines = f.readlines()
-        total_score = 0
-        for line in lines:
-            cleared_line = line.strip()
-            shapes = tuple(map(symbol_to_shape, cleared_line.split(" ")))
-            game_res = evaluate_game_result(shapes)
-            total_score += calc_score(shapes[1], game_res)
-        return total_score
+def part_one(data: list[str]):
+    return sum(
+        map(
+            lambda k: calc_score(k[0], k[1]),
+            map(
+                lambda shapes: (
+                    shapes[1],
+                    evaluate_game_result(shapes),
+                ),
+                map(
+                    lambda x: tuple(x),
+                    map(
+                        lambda pair: map(symbol_to_shape, pair),
+                        map(lambda s: s.split(" "), data),
+                    ),
+                ),
+            ),
+        )
+    )
 
 
-def part_two(filename: str):
+def part_two(data: list[str]):
+    return sum(
+        map(
+            lambda x: calc_score(x[0], x[1]),
+            map(
+                lambda d: (deduce_shape(d[0], d[1]), d[1]),
+                map(
+                    lambda hint: (
+                        symbol_to_shape(hint[0]),
+                        letter_to_game_result(hint[1]),
+                    ),
+                    map(lambda s: s.split(" "), data),
+                ),
+            ),
+        )
+    )
+
+
+def read_data(filename: str) -> list[str]:
     with open(filename, "r") as f:
-        lines = f.readlines()
-        total_score = 0
-        for line in lines:
-            hint = line.strip().split(" ")
-            game_res = letter_to_game_result(hint[1])
-            opponents_shape = symbol_to_shape(hint[0])
-            your_shape = deduce_shape(opponents_shape, game_res)
-            total_score += calc_score(your_shape, game_res)
-        return total_score
+        return list(map(lambda x: x.strip(), f.readlines()))
 
 
 def main():
-    # print(part_one("input.txt"))
-    print(part_two("input.txt"))
+    data = read_data("input_test.txt")
+    print(f"Part one: {part_one(data)}")
+    print(f"Part two: {part_two(data)}")
 
 
 if __name__ == "__main__":
