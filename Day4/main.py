@@ -14,8 +14,11 @@ class SectionRange:
             and self.right_boundary <= other.right_boundary
         )
 
-    def to_set(self) -> set:
-        return set(range(self.left_boundary, self.right_boundary + 1))
+    def overlaps(self, other: SectionRange) -> bool:
+        return (
+            other.left_boundary <= self.left_boundary <= other.right_boundary
+            or other.left_boundary <= self.right_boundary <= other.right_boundary
+        )
 
 
 def split_pairs(pairs: str) -> tuple[SectionRange, SectionRange]:
@@ -41,7 +44,7 @@ def part_one(data: list[str]):
 
 
 def any_overlap(first_range: SectionRange, second_range: SectionRange) -> bool:
-    return len(first_range.to_set().intersection(second_range.to_set())) > 0
+    return first_range.overlaps(second_range) or second_range.overlaps(first_range)
 
 
 def part_two(data: list[str]):
